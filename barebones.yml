@@ -1,0 +1,7 @@
+schema: "1"
+id: barebones
+stages:
+- id: wait
+  type: wait
+  config:
+    waitTime: 5
