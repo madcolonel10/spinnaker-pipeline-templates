@@ -1,0 +1,105 @@
+schema: "1"
+id: myTemplate
+protect: false
+metadata:
+  name: Bake and Deploy
+  description: bake and deploy test template 
+  owner: visardan@cisco.com
+  scopes: []
+variables: []
+configuration:
+  concurrentExecutions:
+    parallel: []
+    limitConcurrent: true
+  triggers:
+    - enabled: true
+      job: IT-GATS-CD_Technology_Architecture/job/spinnaker/job/Spinnaker-demo-poll
+      master: my-jenkins-master
+      name: jenkins-build
+      type: jenkins
+  parameters: 
+    - name: test
+      default: test
+    - name: test1
+      default: test1
+  notifications: []
+  variables: []
+stages:
+  - id: jenkins1
+    type: jenkins
+    dependsOn: []
+    name: Jenkins-Build
+    config:
+      continuePipeline: false
+      failPipeline: true
+      job: IT-GATS-CD_Technology_Architecture/job/spinnaker/job/spinnaker-internal-quay-helloworld
+      master: my-jenkins-master
+      parameters: {}
+  - id: deploy2
+    type: deploy
+    dependsOn:
+      -jenkins1
+    name: Test-Deploy
+    config:
+      clusters:
+        - account: cae-kube-account
+          application: openshiftapp
+          cloudProvider: kubernetes
+          containers:
+          - args: []
+            command: []
+            envVars: []
+            imageDescription:
+              account: cae-container-account
+              imageId: containers.cisco.com/it_gats_cta/spinnaker_spinnaker:latest
+              registry: containers.cisco.com
+              repository: it_gats_cta/spinnaker_spinnaker
+              tag: latest
+            imagePullPolicy: ALWAYS
+            limits:
+              cpu: ''
+              memory: ''
+            name: itgatscta-spinnakerspinnaker
+            ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+            requests:
+              cpu: ''
+              memory: ''
+            volumeMounts: []
+          dnsPolicy: ClusterFirst
+          events: []
+          freeFormDetails: test
+          interestingHealthProviderNames:
+          - KubernetesContainer
+          - KubernetesPod
+          loadBalancers:
+          - openshiftapp-demo1-dev
+          namespace: spinnaker
+          nodeSelector: {}
+          podAnnotations: {}
+          provider: kubernetes
+          region: spinnaker
+          replicaSetAnnotations: {}
+          securityGroups: []
+          stack: bread
+          strategy: ''
+          targetSize: 1
+          terminationGracePeriodSeconds: 30
+          volumeSources: []
+        overrideTimeout: true
+        stageTimeoutMs: 1200000
+
+  - id: manualJudgment4
+    type: manualJudgment
+    dependsOn:
+      - deploy2
+    name: Manual Judgment
+    config:
+      failPipeline: true
+      instructions: Validate if Deployment to Test is Success
+      judgmentInputs:
+        - value: Approved
+        - value: Fail
+      notifications: []
