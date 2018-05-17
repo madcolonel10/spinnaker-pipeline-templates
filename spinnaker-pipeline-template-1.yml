@@ -5,7 +5,8 @@ metadata:
   name: Bake and Deploy
   description: bake and deploy test template 
   owner: visardan@cisco.com
-  scopes: []
+  scopes: 
+  - global
 variables: []
 configuration:
   concurrentExecutions:
